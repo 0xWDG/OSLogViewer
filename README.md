@@ -75,6 +75,10 @@ OSLogViewer(
 )
 ```
 
+## Screenshots
+
+<img src='https://github.com/0xWDG/OSLogViewer/assets/1290461/19acba9f-d369-4c1e-bda5-643c7b87a017' height='500'>
+
 ## Contact
 
 We can get in touch via [Twitter/X](https://twitter.com/0xWDG), [Discord](https://discordapp.com/users/918438083861573692), [Mastodon](https://iosdev.space/@0xWDG), [Threads](https://threads.net/@0xwdg), [Bluesky](https://bsky.app/profile/0xwdg.bsky.social).

@@ -39,7 +39,11 @@ import OSLogViewer
 // uses your app's bundle identifier as subsystem
 // and shows all logs from the last hour.
 
-OSLogViewer()
+NavigationLink {
+    OSLogViewer()
+} label: {
+    Text("View logs")
+}
 ```
 
 ### Custom usage

@@ -79,7 +79,7 @@ public struct OSLogViewer: View {
         .overlay {
             if logMessages.isEmpty {
                 if !finishedCollecting {
-                    if #available(iOS 17.0, macOS 14.0, *) {
+                    if #available(iOS 17.0, macOS 14.0, watchOS 10.0, tvOS 17.0, *) {
                         ContentUnavailableView("Collecting logs...", systemImage: "hourglass")
                     } else {
                         VStack {
@@ -88,7 +88,7 @@ public struct OSLogViewer: View {
                         }
                     }
                 } else {
-                    if #available(iOS 17.0, macOS 14.0, *) {
+                    if #available(iOS 17.0, macOS 14.0, watchOS 10.0, tvOS 17.0, *) {
                         ContentUnavailableView(
                             "No results found",
                             systemImage: "magnifyingglass",

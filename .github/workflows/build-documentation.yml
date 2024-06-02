@@ -13,6 +13,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Create folder for generated documentation
+        run: |
+          mkdir docs
+
       - name: Build Documentation
         run: |
           swift package --allow-writing-to-directory docs \

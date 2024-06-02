@@ -90,7 +90,7 @@ OSLogViewer(
 
 ## Screenshots
 
-<img src='https://github.com/0xWDG/OSLogViewer/assets/1290461/19acba9f-d369-4c1e-bda5-643c7b87a017' height='500'>
+<img src='https://github.com/0xWDG/OSLogViewer/assets/1290461/c2f870b5-cb7c-42f0-bdfd-78b88b73bb3a' height='500'>
 
 ## Export example
 

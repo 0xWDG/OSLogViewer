@@ -31,10 +31,11 @@ jobs:
           cd docs
           git init
           git add -A
-          git config --local user.email "${{ github.repository_owner }}@users.noreply.github.com"
-          git config --local user.name "${{ github.repository_owner }}"
+          # git config --local user.email "${{ github.repository_owner }}@users.noreply.github.com"
+          # git config --local user.name "${{ github.repository_owner }}"
           git commit -m 'deploy'
-          git push \
-          "https://${{ github.repository_owner }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" \
-          HEAD:docs \
-          --force
+          git push HEAD:docs --force
+          # git push \
+          # "https://${{ github.repository_owner }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" \
+          # HEAD:docs \
+          # --force

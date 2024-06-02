@@ -1,0 +1,36 @@
+name: build-documentation
+
+on:
+  push:
+    branches:
+      - "main"
+  workflow_dispatch:
+
+jobs:
+  build-docc:
+    runs-on: macos-12
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Build Documentation
+        run: |
+          swift package --allow-writing-to-directory docs \
+          generate-documentation \
+          --target OSLogViewer \
+          --disable-indexing \
+          --output-path docs \
+          --transform-for-static-hosting
+
+      - name: Init new repo in dist folder and commit generated files
+        run: |
+          cd docs
+          git init
+          git add -A
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git commit -m 'deploy'
+          git push \
+          "https://${GITHUB_ACTOR}:${{ secrets.GITHUB_TOKEN }}@github.com/${REPOSITORY}.git"
+          HEAD:docs \
+          --force

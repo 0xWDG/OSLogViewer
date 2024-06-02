@@ -15,7 +15,7 @@ let package = Package(
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
             name: "OSLogViewer",
-            targets: ["OSLogViewer"]),
+            targets: ["OSLogViewer"])
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -24,6 +24,13 @@ let package = Package(
             name: "OSLogViewer"),
         .testTarget(
             name: "OSLogViewerTests",
-            dependencies: ["OSLogViewer"]),
+            dependencies: ["OSLogViewer"])
     ]
 )
+
+#if swift(>=5.6)
+  // Add the documentation compiler plugin if possible
+  package.dependencies.append(
+    .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.0.0")
+  )
+#endif

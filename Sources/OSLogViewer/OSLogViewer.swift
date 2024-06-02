@@ -11,15 +11,18 @@
 import SwiftUI
 import OSLog
 
-/// OSLogViewer
+/// OSLogViewer is made for viewing your apps OS_Log history,
+/// it is a SwiftUI view which can be used in your app to view and export your logs.
 public struct OSLogViewer: View {
-    /// Subsystem to read
+    /// Subsystem to read logs from
     public var subsystem: String
 
     /// From which date preriod
     public var since: Date
 
-    /// OSLogViewer
+    /// OSLogViewer is made for viewing your apps OS_Log history,
+    /// it is a SwiftUI view which can be used in your app to view and export your logs.
+    ///
     /// - Parameters:
     ///   - subsystem: which subsystem should be read
     ///   - since: from which time (standard 1hr)
@@ -43,6 +46,7 @@ public struct OSLogViewer: View {
     /// This variable saves the export sheet state
     private var exportSheet: Bool = false
 
+    /// The body of the view
     public var body: some View {
         NavigationView {
             List {
@@ -58,23 +62,26 @@ public struct OSLogViewer: View {
                     .listRowBackground(getBackgroundColor(level: entry.level))
                 }
             }
-            .navigationViewStyle(.stack) // iPad
-            .navigationBarTitle("OSLog viewer", displayMode: .inline)
-            .listStyle(InsetGroupedListStyle())
+            .modifier(OSLogModifier())
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    ShareLink(
-                        items: export()
-                    ).disabled(!finishedCollecting)
-                }
+                #if os(macOS)
+                    if #available(iOS 17.0, macOS 14.0, watchOS 10.0, tvOS 17.0, *) {
+                        ShareLink(
+                            items: export()
+                        )
+                        .disabled(!finishedCollecting)
+                    }
+                #else
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        if #available(iOS 17.0, macOS 14.0, watchOS 10.0, tvOS 17.0, *) {
+                            ShareLink(
+                                items: export()
+                            )
+                            .disabled(!finishedCollecting)
+                        }
+                    }
+                #endif
             }
-        }
-        .sheet(isPresented: $exportSheet) {
-            ShareLink(
-                items: export(),
-                subject: Text("OSLog Archive"),
-                message: Text("This is the OSLog archive for this application")
-            )
         }
         .overlay {
             if logMessages.isEmpty {
@@ -132,8 +139,10 @@ public struct OSLogViewer: View {
                     "\($0.composedMessage)\r\n" +
                     getLogLevelEmoji(level: $0.level) +
                     " \($0.date.formatted()) 🏛️ \($0.sender) ⚙️ \($0.subsystem) 🌐 \($0.category)"
-                }.joined(separator: "\r\n\r\n"),
-            ].joined()
+                }
+                .joined(separator: "\r\n\r\n")
+            ]
+            .joined()
         ]
     }
 
@@ -207,18 +216,23 @@ public struct OSLogViewer: View {
                 .accessibilityLabel("Default")
         }
     }
-    
+
     /// Generate the background color for the log message
     /// - Parameter level: log level
     /// - Returns: The appropiate color
     func getBackgroundColor(level: OSLogEntryLog.Level) -> Color {
         switch level {
         case .undefined, .debug, .info, .notice:
+            #if canImport(UIKit)
             Color(uiColor: UIColor.secondarySystemGroupedBackground)
+            #else
+            Color.white
+            #endif
 
         case .error:
             // Fetched colors with color picker from Xcode
             // Using a `dynamicProvider` to support light & dark mode.
+            #if canImport(UIKit)
             Color(uiColor: .init(dynamicProvider: { traits in
                 if traits.userInterfaceStyle == .light {
                     return .init(red: 1, green: 0.968, blue: 0.898, alpha: 1)
@@ -226,10 +240,14 @@ public struct OSLogViewer: View {
                     return .init(red: 0.858, green: 0.717, blue: 0.603, alpha: 0.4)
                 }
             }))
+            #else
+            Color.yellow
+            #endif
 
         case .fault:
             // Fetched colors with color picker from Xcode
             // Using a `dynamicProvider` to support light & dark mode.
+            #if canImport(UIKit)
             Color(uiColor: .init(dynamicProvider: { traits in
                 if traits.userInterfaceStyle == .light {
                     return .init(red: 0.98, green: 0.90, blue: 0.90, alpha: 1)
@@ -238,12 +256,19 @@ public struct OSLogViewer: View {
 
                 }
             }))
+            #else
+            Color.red
+            #endif
 
         default:
+            #if canImport(UIKit)
             Color(uiColor: UIColor.secondarySystemGroupedBackground)
+            #else
+            Color.white
+            #endif
         }
     }
-    
+
     /// Get the logs
     public func getLog() async {
         // We start collecting
@@ -272,9 +297,21 @@ public struct OSLogViewer: View {
         // We've finished collecting
         finishedCollecting = true
     }
+
+    struct OSLogModifier: ViewModifier {
+        func body(content: Content) -> some View {
+            #if os(macOS)
+            content
+            #else
+            content
+                .navigationViewStyle(.stack) // iPad
+                .navigationBarTitle("OSLog viewer", displayMode: .inline)
+            #endif
+        }
+    }
 }
 
-struct OSLogViewer_Previews : PreviewProvider {
+struct OSLogViewer_Previews: PreviewProvider {
     static var previews: some View {
         OSLogViewer()
     }

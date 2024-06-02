@@ -17,12 +17,7 @@ jobs:
         run: |
           mkdir docs
 
-      - name: TEST
-        run: |
-          echo "AAAA" > docs/index.html
-
       - name: Build Documentation
-        if: false
         run: |
           swift package --allow-writing-to-directory docs \
           generate-documentation \

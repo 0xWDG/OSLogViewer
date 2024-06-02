@@ -35,6 +35,6 @@ jobs:
           git config --local user.name "GitHub Action"
           git commit -m 'deploy'
           git push \
-          "https://${GITHUB_ACTOR}:${{ secrets.GITHUB_TOKEN }}@github.com/${REPOSITORY}.git"
+          "https://${GITHUB_ACTOR}:${{ secrets.GITHUB_TOKEN }}@github.com/${REPOSITORY}.git" \
           HEAD:docs \
           --force

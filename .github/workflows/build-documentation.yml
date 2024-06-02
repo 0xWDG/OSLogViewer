@@ -25,7 +25,7 @@ jobs:
           --disable-indexing \
           --output-path docs \
           --transform-for-static-hosting \
-          --hosting-base-path ${{ github.repository }}/
+          --hosting-base-path `basename ${{ github.repository }}`/
 
       - name: Init new repo in dist folder and commit generated files
         run: |

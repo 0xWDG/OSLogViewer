@@ -28,6 +28,7 @@ jobs:
 
       - name: Init new repo in dist folder and commit generated files
         run: |
+          cd docs
           git init -b docs
           git add -A .
           git config user.name github-actions

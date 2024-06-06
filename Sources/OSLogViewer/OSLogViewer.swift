@@ -11,6 +11,10 @@
 import SwiftUI
 import OSLog
 
+#if canImport(UIKit)
+import UIKit
+#endif
+
 /// OSLogViewer is made for viewing your apps OS_Log history,
 /// it is a SwiftUI view which can be used in your app to view and export your logs.
 public struct OSLogViewer: View {
@@ -48,40 +52,43 @@ public struct OSLogViewer: View {
 
     /// The body of the view
     public var body: some View {
-        NavigationView {
+        VStack {
             List {
                 ForEach(logMessages, id: \.self) { entry in
                     VStack {
                         // Actual log message
                         Text(entry.composedMessage)
+                            .frame(maxWidth: .infinity, alignment: .leading)
 
                         // Details (time, framework, subsystem, category
                         detailsBuilder(for: entry)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .fixedSize(horizontal: false, vertical: true)
                             .font(.footnote)
                     }
                     .listRowBackground(getBackgroundColor(level: entry.level))
                 }
             }
-            .modifier(OSLogModifier())
-            .toolbar {
-                #if os(macOS)
-                    if #available(iOS 17.0, macOS 14.0, watchOS 10.0, tvOS 17.0, *) {
-                        ShareLink(
-                            items: export()
-                        )
-                        .disabled(!finishedCollecting)
-                    }
-                #else
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        if #available(iOS 17.0, macOS 14.0, watchOS 10.0, tvOS 17.0, *) {
-                            ShareLink(
-                                items: export()
-                            )
-                            .disabled(!finishedCollecting)
-                        }
-                    }
-                #endif
+        }
+        .modifier(OSLogModifier())
+        .toolbar {
+#if os(macOS)
+            if #available(iOS 17.0, macOS 14.0, watchOS 10.0, tvOS 17.0, *) {
+                ShareLink(
+                    items: export()
+                )
+                .disabled(!finishedCollecting)
             }
+#else
+            ToolbarItem(placement: .navigationBarTrailing) {
+                if #available(iOS 17.0, macOS 14.0, watchOS 10.0, tvOS 17.0, *) {
+                    ShareLink(
+                        items: export()
+                    )
+                    .disabled(!finishedCollecting)
+                }
+            }
+#endif
         }
         .overlay {
             if logMessages.isEmpty {
@@ -140,9 +147,9 @@ public struct OSLogViewer: View {
                     getLogLevelEmoji(level: $0.level) +
                     " \($0.date.formatted()) 🏛️ \($0.sender) ⚙️ \($0.subsystem) 🌐 \($0.category)"
                 }
-                .joined(separator: "\r\n\r\n")
+                    .joined(separator: "\r\n\r\n")
             ]
-            .joined()
+                .joined()
         ]
     }
 
@@ -154,15 +161,18 @@ public struct OSLogViewer: View {
         // No accebility labels are used,
         // If added it will _always_ file to check in compile time.
         getLogLevelIcon(level: entry.level) +
-        Text(" ") +
+        // Non breaking space
+        Text("\u{00a0}") +
+        // Date
         Text(entry.date, style: .time) +
+        // (Breaking) space
         Text(" ") +
         // 􀤨 Framework (aka sender)
-        Text("\(Image(systemName: "building.columns")) \(entry.sender) ") +
+        Text("\(Image(systemName: "building.columns"))\u{00a0}\(entry.sender) ") +
         // 􀥎 Subsystem
-        Text("\(Image(systemName: "gearshape.2")) \(entry.subsystem) ") +
+        Text("\(Image(systemName: "gearshape.2"))\u{00a0}\(entry.subsystem) ") +
         // 􀦲 Category
-        Text("\(Image(systemName: "square.grid.3x3")) \(entry.category)")
+        Text("\(Image(systemName: "square.grid.3x3"))\u{00a0}\(entry.category)")
     }
 
     /// Generate an emoji for the current log level
@@ -223,16 +233,16 @@ public struct OSLogViewer: View {
     func getBackgroundColor(level: OSLogEntryLog.Level) -> Color {
         switch level {
         case .undefined, .debug, .info, .notice:
-            #if canImport(UIKit)
+#if canImport(UIKit)
             Color(uiColor: UIColor.secondarySystemGroupedBackground)
-            #else
+#else
             Color.white
-            #endif
+#endif
 
         case .error:
             // Fetched colors with color picker from Xcode
             // Using a `dynamicProvider` to support light & dark mode.
-            #if canImport(UIKit)
+#if canImport(UIKit)
             Color(uiColor: .init(dynamicProvider: { traits in
                 if traits.userInterfaceStyle == .light {
                     return .init(red: 1, green: 0.968, blue: 0.898, alpha: 1)
@@ -240,14 +250,14 @@ public struct OSLogViewer: View {
                     return .init(red: 0.858, green: 0.717, blue: 0.603, alpha: 0.4)
                 }
             }))
-            #else
+#else
             Color.yellow
-            #endif
+#endif
 
         case .fault:
             // Fetched colors with color picker from Xcode
             // Using a `dynamicProvider` to support light & dark mode.
-            #if canImport(UIKit)
+#if canImport(UIKit)
             Color(uiColor: .init(dynamicProvider: { traits in
                 if traits.userInterfaceStyle == .light {
                     return .init(red: 0.98, green: 0.90, blue: 0.90, alpha: 1)
@@ -256,16 +266,16 @@ public struct OSLogViewer: View {
 
                 }
             }))
-            #else
+#else
             Color.red
-            #endif
+#endif
 
         default:
-            #if canImport(UIKit)
+#if canImport(UIKit)
             Color(uiColor: UIColor.secondarySystemGroupedBackground)
-            #else
+#else
             Color.white
-            #endif
+#endif
         }
     }
 
@@ -300,13 +310,13 @@ public struct OSLogViewer: View {
 
     struct OSLogModifier: ViewModifier {
         func body(content: Content) -> some View {
-            #if os(macOS)
+#if os(macOS)
             content
-            #else
+#else
             content
                 .navigationViewStyle(.stack) // iPad
                 .navigationBarTitle("OSLog viewer", displayMode: .inline)
-            #endif
+#endif
         }
     }
 }

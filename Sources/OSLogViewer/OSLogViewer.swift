@@ -11,10 +11,6 @@
 import SwiftUI
 import OSLog
 
-#if canImport(UIKit)
-import UIKit
-#endif
-
 /// OSLogViewer is made for viewing your apps OS_Log history,
 /// it is a SwiftUI view which can be used in your app to view and export your logs.
 public struct OSLogViewer: View {
@@ -224,58 +220,6 @@ public struct OSLogViewer: View {
             // 􀼸
             Text(Image(systemName: "bell.square.fill"))
                 .accessibilityLabel("Default")
-        }
-    }
-
-    /// Generate the background color for the log message
-    /// - Parameter level: log level
-    /// - Returns: The appropiate color
-    func getBackgroundColor(level: OSLogEntryLog.Level) -> Color {
-        switch level {
-        case .undefined, .debug, .info, .notice:
-#if canImport(UIKit)
-            Color(uiColor: UIColor.secondarySystemGroupedBackground)
-#else
-            Color.white
-#endif
-
-        case .error:
-            // Fetched colors with color picker from Xcode
-            // Using a `dynamicProvider` to support light & dark mode.
-#if canImport(UIKit)
-            Color(uiColor: .init(dynamicProvider: { traits in
-                if traits.userInterfaceStyle == .light {
-                    return .init(red: 1, green: 0.968, blue: 0.898, alpha: 1)
-                } else {
-                    return .init(red: 0.858, green: 0.717, blue: 0.603, alpha: 0.4)
-                }
-            }))
-#else
-            Color.yellow
-#endif
-
-        case .fault:
-            // Fetched colors with color picker from Xcode
-            // Using a `dynamicProvider` to support light & dark mode.
-#if canImport(UIKit)
-            Color(uiColor: .init(dynamicProvider: { traits in
-                if traits.userInterfaceStyle == .light {
-                    return .init(red: 0.98, green: 0.90, blue: 0.90, alpha: 1)
-                } else {
-                    return .init(red: 0.26, green: 0.15, blue: 0.17, alpha: 1)
-
-                }
-            }))
-#else
-            Color.red
-#endif
-
-        default:
-#if canImport(UIKit)
-            Color(uiColor: UIColor.secondarySystemGroupedBackground)
-#else
-            Color.white
-#endif
         }
     }
 

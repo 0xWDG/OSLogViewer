@@ -9,6 +9,9 @@ on:
 jobs:
   build-docc:
     runs-on: macos-latest
+    env:
+      product: OSLogViewer
+      branch: docs
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -21,7 +24,7 @@ jobs:
         run: |
           swift package --allow-writing-to-directory docs \
           generate-documentation \
-          --target OSLogViewer \
+          --target $product \
           --disable-indexing \
           --output-path docs \
           --transform-for-static-hosting \
@@ -30,7 +33,7 @@ jobs:
       - name: Init new repo in dist folder and commit generated files
         run: |
           cd docs
-          git init -b docs
+          git init -b $branch
           DOCURL=`basename ${{ github.repository }}`
           echo "{\"meta\":{\"title\":\"$DOCURL Documentation\"}}" > theme-settings.json
           echo "<script>window.location.href = 'documentation/$DOCURL/'.toLowerCase();</script>" > index.html
@@ -40,5 +43,5 @@ jobs:
           git commit -m 'deploy'
           git push \
           "https://${{ github.repository_owner }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" \
-          HEAD:docs \
+          HEAD:$branch \
           --force

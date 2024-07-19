@@ -41,7 +41,7 @@ extension OSLogViewer {
 
     /// Get the default background color
     func getBackgroundColorDefault() -> Color {
-#if canImport(UIKit)
+#if canImport(UIKit) && !os(tvOS) && !os(watchOS)
             Color(uiColor: UIColor.secondarySystemGroupedBackground)
 #elseif canImport(AppKit)
             Color(nsColor: .init(name: "debug", dynamicProvider: { traits in
@@ -53,13 +53,13 @@ extension OSLogViewer {
             }))
 #else
             // Fallback
-            Color.white
+            Color.clear
 #endif
     }
 
     /// Get the error background color
     func getBackgroundColorError() -> Color {
-#if canImport(UIKit)
+#if canImport(UIKit) && !os(watchOS)
             Color(uiColor: .init(dynamicProvider: { traits in
                 if traits.userInterfaceStyle == .light {
                     return .init(red: 1, green: 0.968, blue: 0.898, alpha: 1)
@@ -82,7 +82,7 @@ extension OSLogViewer {
 
     /// Get the fault background color
     func getBackgroundColorFault() -> Color {
-#if canImport(UIKit)
+#if canImport(UIKit) && !os(watchOS)
             Color(uiColor: .init(dynamicProvider: { traits in
                 if traits.userInterfaceStyle == .light {
                     return .init(red: 0.98, green: 0.90, blue: 0.90, alpha: 1)

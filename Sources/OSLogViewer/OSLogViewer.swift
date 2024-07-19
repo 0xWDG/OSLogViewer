@@ -75,7 +75,7 @@ public struct OSLogViewer: View {
                 )
                 .disabled(!finishedCollecting)
             }
-#else
+#elseif !os(tvOS) && !os(watchOS)
             ToolbarItem(placement: .navigationBarTrailing) {
                 if #available(iOS 17.0, macOS 14.0, watchOS 10.0, tvOS 17.0, *) {
                     ShareLink(
@@ -84,6 +84,8 @@ public struct OSLogViewer: View {
                     .disabled(!finishedCollecting)
                 }
             }
+#else
+            EmptyView()
 #endif
         }
         .overlay {
@@ -259,7 +261,9 @@ public struct OSLogViewer: View {
 #else
             content
                 .navigationViewStyle(.stack) // iPad
+#if !os(tvOS) && !os(watchOS)
                 .navigationBarTitle("OSLog viewer", displayMode: .inline)
+#endif
 #endif
         }
     }

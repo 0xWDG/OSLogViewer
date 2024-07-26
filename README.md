@@ -23,7 +23,7 @@ Install using Swift Package Manager
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/0xWDG/OSLogViewer.git", .branch("main")),
+    .package(url: "https://github.com/0xWDG/OSLogViewer.git", branch: "main"),
 ],
 targets: [
     .target(name: "MyTarget", dependencies: [

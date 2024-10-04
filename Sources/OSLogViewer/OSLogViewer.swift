@@ -230,28 +230,37 @@ public struct OSLogViewer: View {
         // We start collecting
         finishedCollecting = false
 
-        do {
-            /// Initialize logstore for the current proces
-            let logStore = try OSLogStore(scope: .currentProcessIdentifier)
+        DispatchQueue.global(qos: .background).async {
+            do {
+                /// Initialize logstore for the current proces
+                let logStore = try OSLogStore(scope: .currentProcessIdentifier)
 
-            /// Fetch all logs since a specific date
-            let sinceDate = logStore.position(date: since)
+                /// Fetch all logs since a specific date
+                let sinceDate = logStore.position(date: since)
 
-            /// Predicate (filter) all results to have the subsystem starting with the given subsystem
-            let predicate = NSPredicate(format: "subsystem BEGINSWITH %@", subsystem)
+                /// Predicate (filter) all results to have the subsystem starting with the given subsystem
+                let predicate = NSPredicate(format: "subsystem BEGINSWITH %@", subsystem)
 
-            /// Get all logs from the log store
-            let allEntries = try logStore.getEntries(at: sinceDate, matching: predicate)
+                /// Get all logs from the log store
+                let allEntries = try logStore.getEntries(
+                    at: sinceDate,
+                    matching: predicate
+                ).compactMap { $0 as? OSLogEntryLog }
 
-            /// Remap from `AnySequence<OSLogEntry>` to type `[OSLogEntryLog]`
-            logMessages = allEntries.compactMap { $0 as? OSLogEntryLog }
-        } catch {
-            // We fail to get the results, add this to the log.
-            os_log(.fault, "Something went wrong %@", error as NSError)
+                DispatchQueue.main.async {
+                    /// Remap from `AnySequence<OSLogEntry>` to type `[OSLogEntryLog]`
+                    logMessages = allEntries
+                }
+            } catch {
+                // We fail to get the results, add this to the log.
+                os_log(.fault, "Something went wrong %@", error as NSError)
+            }
+
+            DispatchQueue.main.async {
+                // We've finished collecting
+                finishedCollecting = true
+            }
         }
-
-        // We've finished collecting
-        finishedCollecting = true
     }
 
     struct OSLogModifier: ViewModifier {

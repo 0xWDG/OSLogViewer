@@ -105,7 +105,6 @@ public class OSLogExtractor {
                 $0 as? OSLogEntryLog
             }
 
-
         } catch {
             // We fail to get the results, add this to the log.
             os_log(.fault, "Something went wrong %@", error as NSError)

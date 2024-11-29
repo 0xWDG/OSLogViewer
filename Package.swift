@@ -5,6 +5,7 @@ import PackageDescription
 
 let package = Package(
     name: "OSLogViewer",
+    defaultLocalization: "en",
     platforms: [
         .macOS(.v12),
         .iOS(.v16),
@@ -15,15 +16,21 @@ let package = Package(
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
             name: "OSLogViewer",
-            targets: ["OSLogViewer"])
+            targets: ["OSLogViewer"]
+        )
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "OSLogViewer"),
+            name: "OSLogViewer",
+            resources: [
+                .process("Localizable.xcstrings")
+            ]
+        ),
         .testTarget(
             name: "OSLogViewerTests",
-            dependencies: ["OSLogViewer"])
+            dependencies: ["OSLogViewer"]
+        )
     ]
 )

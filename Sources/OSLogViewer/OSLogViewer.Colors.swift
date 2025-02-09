@@ -8,6 +8,7 @@
 //  https://github.com/0xWDG/OSLogViewer
 //  MIT LICENCE
 
+#if canImport(SwiftUI) && canImport(OSLog)
 import SwiftUI
 import OSLog
 
@@ -103,3 +104,4 @@ extension OSLogViewer {
 #endif
     }
 }
+#endif

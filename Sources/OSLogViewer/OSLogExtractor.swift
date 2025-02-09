@@ -8,7 +8,10 @@
 //  MIT LICENCE
 
 import Foundation
+
+#if canImport(OSLog)
 import OSLog
+#endif
 
 /// OSLogExtractor is made to extract your apps OS_Log history,
 public class OSLogExtractor {
@@ -36,6 +39,7 @@ public class OSLogExtractor {
 
     /// Export OSLog as string.
     public func export() async -> String {
+#if canImport(OSLog)
         let logMessages = await getLog()
 
         let appName: String = {
@@ -59,8 +63,12 @@ public class OSLogExtractor {
                 .joined(separator: "\r\n\r\n")
         ]
             .joined()
+#else
+        return ""
+#endif
     }
 
+#if canImport(OSLog)
     /// Generate an emoji for the current log level
     /// - Parameter level: log level
     /// - Returns: Emoji
@@ -112,4 +120,5 @@ public class OSLogExtractor {
             return []
         }
     }
+#endif
 }

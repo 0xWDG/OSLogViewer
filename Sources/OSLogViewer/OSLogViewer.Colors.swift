@@ -47,9 +47,9 @@ extension OSLogViewer {
 #elseif canImport(AppKit)
             Color(nsColor: .init(name: "debug", dynamicProvider: { traits in
                 if traits.name == .darkAqua || traits.name == .vibrantDark {
-                    return .init(red: 1, green: 1, blue: 1, alpha: 1)
-                } else {
                     return .init(red: 0.11, green: 0.11, blue: 0.12, alpha: 1)
+                } else {
+                    return .init(red: 1, green: 1, blue: 1, alpha: 1)
                 }
             }))
 #else

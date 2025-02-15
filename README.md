@@ -14,8 +14,8 @@ _Key features:_
 
 ## Requirements
 
-- Swift 5.9+ (Xcode 15+)
-- iOS 13+, macOS 10.15+
+- Swift 5.8+ (Xcode 14.3+)
+- iOS 16+, macOS 12+, watchOS 9+, tvOS 16+, visionOS 1+
 
 ## Installation
 
@@ -126,6 +126,8 @@ Log message
   - Improved support for dark mode.
   - Colors are more similar to Xcode's console.
   - Added support for exporting logs.
+- 1.0.2
+  - Fixed OSLogViewer on Mac not displaying correctly.
 
 ## Contact
 

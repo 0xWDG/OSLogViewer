@@ -10,7 +10,7 @@
 
 #if canImport(SwiftUI) && canImport(OSLog)
 import SwiftUI
-import OSLog
+@preconcurrency import OSLog
 
 /// OSLogViewer is made for viewing your apps OS_Log history,
 /// it is a SwiftUI view which can be used in your app to view and export your logs.

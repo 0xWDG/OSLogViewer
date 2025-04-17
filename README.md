@@ -126,8 +126,31 @@ Log message
   - Improved support for dark mode.
   - Colors are more similar to Xcode's console.
   - Added support for exporting logs.
-- 1.0.2
-  - Fixed OSLogViewer on Mac not displaying correctly.
+- 1.0.2 & 1.0.3
+  - Fix: building on macOS < 14.
+  - Improved support for dark mode.
+  - Colors are more similar to Xcode's console.
+  - Added support for exporting logs.
+- 1.0.4
+  - Fix: building on all platforms other than iOS.
+  - Improved support for dark mode.
+  - Colors are more similar to Xcode's console.
+  - Added support for exporting logs.
+  - Added online documentation https://0xwdg.github.io/OSLogViewer/
+- 1.0.5
+  - Improve text alignment and word-breaks in the details
+- 1.0.7
+  - Multi platform support
+- 1.0.8
+  - Fix hang on loading data
+- 1.1.0
+  - Added OSLogExtractor
+- 1.1.1
+  - Fixes for Linux targets
+- 1.1.2
+  - Fix logs on Mac displaying incorrectly by @infinitepower18 in #2
+- 1.1.3
+  - Make datarace safe
 
 ## Contact
 

@@ -12,21 +12,19 @@
 import SwiftUI
 @preconcurrency import OSLog
 
-/// OSLogViewer is made for viewing your apps OS_Log history,
-/// it is a SwiftUI view which can be used in your app to view and export your logs.
+/// Displays and exports the current process's OSLog history.
 public struct OSLogViewer: View {
     /// Subsystem to read logs from
-    public var subsystem: String
+    public let subsystem: String
 
-    /// From which date preriod
-    public var since: Date
+    /// Date from which logs should be read.
+    public let since: Date
 
-    /// OSLogViewer is made for viewing your apps OS_Log history,
-    /// it is a SwiftUI view which can be used in your app to view and export your logs.
+    /// Creates an OSLog viewer.
     ///
     /// - Parameters:
-    ///   - subsystem: which subsystem should be read
-    ///   - since: from which time (standard 1hr)
+    ///   - subsystem: Subsystem to read.
+    ///   - since: Date from which logs should be read. Defaults to one hour ago.
     public init(
         subsystem: String = Bundle.main.bundleIdentifier ?? "",
         since: Date = Date().addingTimeInterval(-3600)
@@ -36,53 +34,52 @@ public struct OSLogViewer: View {
     }
 
     @State
-    /// This variable saves the log messages
-    private var logMessages: [OSLogEntryLog] = []
+    /// Immutable log records displayed by the list.
+    private var logMessages: [OSLogRecord] = []
 
     @State
-    /// This variable saves the current state
-    private var finishedCollecting: Bool = false
+    /// Current loading state.
+    private var loadingState: LoadingState = .loading
 
     @State
-    /// This variable saves the export sheet state
-    private var exportSheet: Bool = false
+    /// Archive prepared when logs finish loading.
+    private var exportedArchive: String = ""
+
+    @State
+    /// Identifier used to prevent an older request from publishing stale results.
+    private var loadIdentifier = UUID()
 
     /// The body of the view
     public var body: some View {
-        VStack {
-            List {
-                ForEach(logMessages, id: \.self) { entry in
-                    VStack {
-                        // Actual log message
-                        Text(entry.composedMessage)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+        List(logMessages) { entry in
+            VStack {
+                Text(entry.composedMessage)
+                    .frame(maxWidth: .infinity, alignment: .leading)
 
-                        // Details (time, framework, subsystem, category
-                        detailsBuilder(for: entry)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .font(.footnote)
-                    }
-                    .listRowBackground(getBackgroundColor(level: entry.level))
-                }
+                details(for: entry)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .font(.footnote)
             }
+            .accessibilityElement(children: .combine)
+            .listRowBackground(backgroundColor(for: entry.level))
         }
-        .modifier(OSLogModifier())
+        .modifier(NavigationTitleModifier())
         .toolbar {
 #if os(macOS)
-            if #available(iOS 17.0, macOS 14.0, watchOS 10.0, tvOS 17.0, *) {
+            if #available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *) {
                 ShareLink(
-                    items: export()
+                    item: exportedArchive
                 )
-                .disabled(!finishedCollecting)
+                .disabled(!loadingState.isLoaded)
             }
 #elseif !os(tvOS) && !os(watchOS)
             ToolbarItem(placement: .navigationBarTrailing) {
-                if #available(iOS 17.0, macOS 14.0, watchOS 10.0, tvOS 17.0, *) {
+                if #available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *) {
                     ShareLink(
-                        items: export()
+                        item: exportedArchive
                     )
-                    .disabled(!finishedCollecting)
+                    .disabled(!loadingState.isLoaded)
                 }
             }
 #else
@@ -91,7 +88,8 @@ public struct OSLogViewer: View {
         }
         .overlay {
             if logMessages.isEmpty {
-                if !finishedCollecting {
+                switch loadingState {
+                case .loading:
                     if #available(iOS 17.0, macOS 14.0, watchOS 10.0, tvOS 17.0, *) {
                         ContentUnavailableView("Collecting logs...", systemImage: "hourglass")
                     } else {
@@ -100,7 +98,7 @@ public struct OSLogViewer: View {
                             Text("Collecting logs...")
                         }
                     }
-                } else {
+                case .loaded:
                     if #available(iOS 17.0, macOS 14.0, watchOS 10.0, tvOS 17.0, *) {
                         ContentUnavailableView(
                             "No results found",
@@ -113,53 +111,36 @@ public struct OSLogViewer: View {
                             Text("No results found for subsystem \"\(subsystem)\".")
                         }
                     }
+                case .failed(let message):
+                    if #available(iOS 17.0, macOS 14.0, watchOS 10.0, tvOS 17.0, *) {
+                        ContentUnavailableView(
+                            "Unable to collect logs",
+                            systemImage: "exclamationmark.triangle",
+                            description: Text(message)
+                        )
+                    } else {
+                        VStack {
+                            Image(systemName: "exclamationmark.triangle")
+                            Text("Unable to collect logs")
+                            Text(message)
+                        }
+                    }
                 }
             }
         }
         .refreshable {
             await getLog()
         }
-        .onAppear {
-            Task {
-                await getLog()
-            }
+        .task(id: LoadRequest(subsystem: subsystem, since: since)) {
+            await getLog()
         }
     }
 
-    func export() -> [String] {
-        let appName: String = {
-            if let displayName: String = Bundle.main.infoDictionary?["CFBundleDisplayName"] as? String {
-                return displayName
-            } else if let name: String = Bundle.main.infoDictionary?["CFBundleName"] as? String {
-                return name
-            }
-            return "this application"
-        }()
-
-        return [
-            [
-                "This is the OSLog archive for \(appName).\r\n",
-                "Generated on \(Date().formatted())\r\n",
-                "Generator https://github.com/0xWDG/OSLogViewer\r\n\r\n",
-                logMessages.map {
-                    "\($0.composedMessage)\r\n" +
-                    getLogLevelEmoji(level: $0.level) +
-                    " \($0.date.formatted()) 🏛️ \($0.sender) ⚙️ \($0.subsystem) 🌐 \($0.category)"
-                }
-                    .joined(separator: "\r\n\r\n")
-            ]
-                .joined()
-        ]
-    }
-
-    @ViewBuilder
     /// Build details (time, framework, subsystem, category), for the footnote row
     /// - Parameter entry: log entry
     /// - Returns: Text containing icons and details.
-    func detailsBuilder(for entry: OSLogEntryLog) -> Text {
-        // No accebility labels are used,
-        // If added it will _always_ file to check in compile time.
-        getLogLevelIcon(level: entry.level) +
+    func details(for entry: OSLogRecord) -> Text {
+        logLevelIcon(for: entry.level) +
         // Non breaking space
         Text("\u{00a0}") +
         // Date
@@ -174,30 +155,10 @@ public struct OSLogViewer: View {
         Text("\(Image(systemName: "square.grid.3x3"))\u{00a0}\(entry.category)")
     }
 
-    /// Generate an emoji for the current log level
-    /// - Parameter level: log level
-    /// - Returns: Emoji
-    func getLogLevelEmoji(level: OSLogEntryLog.Level) -> String {
-        switch level {
-        case .undefined, .notice:
-            "🔔"
-        case .debug:
-            "🩺"
-        case .info:
-            "ℹ️"
-        case .error:
-            "❗"
-        case .fault:
-            "‼️"
-        default:
-            "🔔"
-        }
-    }
-
     /// Generate an icon for the current log level
     /// - Parameter level: log level
     /// - Returns: SF Icon as Text
-    func getLogLevelIcon(level: OSLogEntryLog.Level) -> Text {
+    func logLevelIcon(for level: OSLogRecord.Level) -> Text {
         switch level {
         case .undefined, .notice:
             // 􀼸
@@ -219,62 +180,67 @@ public struct OSLogViewer: View {
             // 􀣴
             Text(Image(systemName: "exclamationmark.3"))
                 .accessibilityLabel("Fault")
-        default:
-            // 􀼸
-            Text(Image(systemName: "bell.square.fill"))
-                .accessibilityLabel("Default")
         }
     }
 
-    /// Get the logs
+    /// Reloads the displayed logs.
+    @MainActor
     public func getLog() async {
-        // We start collecting
-        finishedCollecting = false
+        let identifier = UUID()
+        loadIdentifier = identifier
+        loadingState = .loading
 
-        DispatchQueue.global(qos: .background).async {
-            do {
-                /// Initialize logstore for the current proces
-                let logStore = try OSLogStore(scope: .currentProcessIdentifier)
+        do {
+            let records = try await OSLogLoader.records(
+                subsystem: subsystem,
+                since: since
+            )
 
-                /// Fetch all logs since a specific date
-                let sinceDate = logStore.position(date: since)
-
-                /// Predicate (filter) all results to have the subsystem starting with the given subsystem
-                let predicate = NSPredicate(format: "subsystem BEGINSWITH %@", subsystem)
-
-                /// Get all logs from the log store
-                let allEntries = try logStore.getEntries(
-                    at: sinceDate,
-                    matching: predicate
-                ).compactMap { $0 as? OSLogEntryLog }
-
-                DispatchQueue.main.async {
-                    /// Remap from `AnySequence<OSLogEntry>` to type `[OSLogEntryLog]`
-                    logMessages = allEntries
-                }
-            } catch {
-                // We fail to get the results, add this to the log.
-                os_log(.fault, "Something went wrong %@", error as NSError)
+            guard !Task.isCancelled, loadIdentifier == identifier else {
+                return
             }
 
-            DispatchQueue.main.async {
-                // We've finished collecting
-                finishedCollecting = true
+            logMessages = records
+            exportedArchive = OSLogArchive.make(records: records)
+            loadingState = .loaded
+        } catch {
+            guard !Task.isCancelled, loadIdentifier == identifier else {
+                return
             }
+
+            os_log(.fault, "Something went wrong %@", error as NSError)
+            loadingState = .failed(error.localizedDescription)
         }
     }
 
-    struct OSLogModifier: ViewModifier {
+    struct NavigationTitleModifier: ViewModifier {
         func body(content: Content) -> some View {
-#if os(macOS)
+#if os(macOS) || os(tvOS) || os(watchOS)
             content
 #else
             content
-                .navigationViewStyle(.stack) // iPad
-#if !os(tvOS) && !os(watchOS)
-                .navigationBarTitle("OSLog viewer", displayMode: .inline)
+                .navigationTitle("OSLog viewer")
+                .navigationBarTitleDisplayMode(.inline)
 #endif
-#endif
+        }
+    }
+
+    private struct LoadRequest: Hashable {
+        let subsystem: String
+        let since: Date
+    }
+
+    private enum LoadingState {
+        case loading
+        case loaded
+        case failed(String)
+
+        var isLoaded: Bool {
+            if case .loaded = self {
+                true
+            } else {
+                false
+            }
         }
     }
 }

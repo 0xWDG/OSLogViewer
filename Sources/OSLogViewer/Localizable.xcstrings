@@ -57,9 +57,6 @@
     "Debug" : {
       "shouldTranslate" : false
     },
-    "Default" : {
-      "shouldTranslate" : false
-    },
     "Error" : {
       "shouldTranslate" : false
     },
@@ -156,6 +153,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "OSLog bekijken"
+          }
+        }
+      }
+    },
+    "Unable to collect logs" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Protokolle konnten nicht gesammelt werden"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible de collecter les journaux"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kan logboeken niet verzamelen"
           }
         }
       }

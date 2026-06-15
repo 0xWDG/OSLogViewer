@@ -1,3 +1,8 @@
+included:
+  - Sources
+  - Tests
+  - Package.swift
+
 excluded:
   - "*resource_bundle_accessor*" # SwiftPM Generated
   - .build

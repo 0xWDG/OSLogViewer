@@ -23,85 +23,81 @@ import AppKit
 extension OSLogViewer {
     /// Generate the background color for the log message
     /// - Parameter level: log level
-    /// - Returns: The appropiate color
-    func getBackgroundColor(level: OSLogEntryLog.Level) -> Color {
+    /// - Returns: The appropriate color.
+    func backgroundColor(for level: OSLogRecord.Level) -> Color {
         switch level {
         case .undefined, .debug, .info, .notice:
-            getBackgroundColorDefault()
+            Self.defaultBackgroundColor
 
         case .error:
-            getBackgroundColorError()
+            Self.errorBackgroundColor
 
         case .fault:
-            getBackgroundColorFault()
-
-        default:
-            getBackgroundColorDefault()
+            Self.faultBackgroundColor
         }
     }
 
     /// Get the default background color
-    func getBackgroundColorDefault() -> Color {
+    private static let defaultBackgroundColor: Color = {
 #if canImport(UIKit) && !os(tvOS) && !os(watchOS)
-            Color(uiColor: UIColor.secondarySystemGroupedBackground)
+        Color(uiColor: UIColor.secondarySystemGroupedBackground)
 #elseif canImport(AppKit)
-            Color(nsColor: .init(name: "debug", dynamicProvider: { traits in
-                if traits.name == .darkAqua || traits.name == .vibrantDark {
-                    return .init(red: 0.11, green: 0.11, blue: 0.12, alpha: 1)
-                } else {
-                    return .init(red: 1, green: 1, blue: 1, alpha: 1)
-                }
-            }))
+        Color(nsColor: .init(name: "debug", dynamicProvider: { traits in
+            if traits.name == .darkAqua || traits.name == .vibrantDark {
+                return .init(red: 0.11, green: 0.11, blue: 0.12, alpha: 1)
+            } else {
+                return .init(red: 1, green: 1, blue: 1, alpha: 1)
+            }
+        }))
 #else
-            // Fallback
-            Color.clear
+        Color.clear
 #endif
-    }
+    }()
 
     /// Get the error background color
-    func getBackgroundColorError() -> Color {
+    private static let errorBackgroundColor: Color = {
 #if canImport(UIKit) && !os(watchOS)
-            Color(uiColor: .init(dynamicProvider: { traits in
-                if traits.userInterfaceStyle == .light {
-                    return .init(red: 1, green: 0.968, blue: 0.898, alpha: 1)
-                } else {
-                    return .init(red: 0.858, green: 0.717, blue: 0.603, alpha: 0.4)
-                }
-            }))
+        Color(uiColor: .init(dynamicProvider: { traits in
+            if traits.userInterfaceStyle == .light {
+                return .init(red: 1, green: 0.968, blue: 0.898, alpha: 1)
+            } else {
+                return .init(red: 0.858, green: 0.717, blue: 0.603, alpha: 0.4)
+            }
+        }))
 #elseif canImport(AppKit)
-            Color(nsColor: .init(name: "Error", dynamicProvider: { traits in
-                if traits.name == .darkAqua || traits.name == .vibrantDark {
-                    return .init(red: 0.858, green: 0.717, blue: 0.603, alpha: 0.4)
-                } else {
-                    return .init(red: 1, green: 0.968, blue: 0.898, alpha: 1)
-                }
-            }))
+        Color(nsColor: .init(name: "Error", dynamicProvider: { traits in
+            if traits.name == .darkAqua || traits.name == .vibrantDark {
+                return .init(red: 0.858, green: 0.717, blue: 0.603, alpha: 0.4)
+            } else {
+                return .init(red: 1, green: 0.968, blue: 0.898, alpha: 1)
+            }
+        }))
 #else
-            Color.yellow
+        Color.yellow
 #endif
-    }
+    }()
 
     /// Get the fault background color
-    func getBackgroundColorFault() -> Color {
+    private static let faultBackgroundColor: Color = {
 #if canImport(UIKit) && !os(watchOS)
-            Color(uiColor: .init(dynamicProvider: { traits in
-                if traits.userInterfaceStyle == .light {
-                    return .init(red: 0.98, green: 0.90, blue: 0.90, alpha: 1)
-                } else {
-                    return .init(red: 0.26, green: 0.15, blue: 0.17, alpha: 1)
-                }
-            }))
+        Color(uiColor: .init(dynamicProvider: { traits in
+            if traits.userInterfaceStyle == .light {
+                return .init(red: 0.98, green: 0.90, blue: 0.90, alpha: 1)
+            } else {
+                return .init(red: 0.26, green: 0.15, blue: 0.17, alpha: 1)
+            }
+        }))
 #elseif canImport(AppKit)
-            Color(nsColor: .init(name: "Fault", dynamicProvider: { traits in
-                if traits.name == .darkAqua || traits.name == .vibrantDark {
-                    return .init(red: 0.26, green: 0.15, blue: 0.17, alpha: 1)
-                } else {
-                    return .init(red: 0.98, green: 0.90, blue: 0.90, alpha: 1)
-                }
-            }))
+        Color(nsColor: .init(name: "Fault", dynamicProvider: { traits in
+            if traits.name == .darkAqua || traits.name == .vibrantDark {
+                return .init(red: 0.26, green: 0.15, blue: 0.17, alpha: 1)
+            } else {
+                return .init(red: 0.98, green: 0.90, blue: 0.90, alpha: 1)
+            }
+        }))
 #else
-            Color.red
+        Color.red
 #endif
-    }
+    }()
 }
 #endif

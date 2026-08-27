@@ -7,7 +7,7 @@ let package = Package(
     name: "OSLogViewer",
     defaultLocalization: "en",
     platforms: [
-        .macOS(.v11),
+        .macOS(.v12),
         .iOS(.v15),
         .watchOS(.v8),
         .tvOS(.v15)

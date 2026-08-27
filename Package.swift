@@ -7,10 +7,10 @@ let package = Package(
     name: "OSLogViewer",
     defaultLocalization: "en",
     platforms: [
-        .macOS(.v12),
-        .iOS(.v16),
-        .watchOS(.v9),
-        .tvOS(.v16)
+        .macOS(.v11),
+        .iOS(.v15),
+        .watchOS(.v8),
+        .tvOS(.v15)
     ],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.

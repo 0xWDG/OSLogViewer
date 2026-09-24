@@ -9,8 +9,8 @@
 //  MIT LICENCE
 
 #if canImport(SwiftUI) && canImport(OSLog)
-import SwiftUI
 import OSLog
+import SwiftUI
 
 #if canImport(UIKit)
 import UIKit

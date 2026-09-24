@@ -1,5 +1,5 @@
-import XCTest
 @testable import OSLogViewer
+import XCTest
 
 final class OSLogViewerTests: XCTestCase {
     func testArchiveContainsRecordDetails() throws {

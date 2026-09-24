@@ -9,8 +9,8 @@
 //  MIT LICENCE
 
 #if canImport(SwiftUI) && canImport(OSLog)
-import SwiftUI
 @preconcurrency import OSLog
+import SwiftUI
 
 /// Displays and exports the current process's OSLog history.
 public struct OSLogViewer: View {

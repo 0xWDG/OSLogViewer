@@ -15,7 +15,7 @@ _Key features:_
 ## Requirements
 
 - Swift 5.8+ (Xcode 14.3+)
-- iOS 16+, macOS 12+, watchOS 9+, tvOS 16+, visionOS 1+
+- iOS 15+, macOS 12+, watchOS 9+, tvOS 16+, visionOS 1+
 
 ## Installation
 
